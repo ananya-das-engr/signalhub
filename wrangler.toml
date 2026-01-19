@@ -5,11 +5,11 @@ compatibility_date = "2024-12-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "signalhub-db"
-database_id = "<YOUR_D1_DATABASE_ID>"
+database_id = "8e139b48-0911-4dce-9529-9cee10d3a3ec"
 
 [[kv_namespaces]]
 binding = "SUMMARY_KV"
-id = "<YOUR_KV_NAMESPACE_ID>"
+id = "5acd6d5f43ef49d0b8e493c422008c8e"
 
 [ai]
 binding = "AI"
