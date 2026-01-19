@@ -1,16 +1,11 @@
-export async function insertFeedback(env, data) {
-  return env.DB.prepare(
+export async function insertFeedback(env, f) {
+  await env.DB.prepare(
     `
     INSERT INTO feedback (source, content, sentiment, theme)
     VALUES (?, ?, ?, ?)
     `
   )
-    .bind(
-      data.source,
-      data.content,
-      data.sentiment,
-      data.theme
-    )
+    .bind(f.source, f.content, f.sentiment, f.theme)
     .run();
 }
 
