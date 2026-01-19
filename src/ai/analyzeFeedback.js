@@ -6,7 +6,7 @@ export async function analyzeFeedback(env, content) {
         {
           role: "system",
           content:
-            "Analyze the feedback and return JSON with fields: sentiment (Positive|Neutral|Negative) and theme (Performance|Pricing|Docs|Reliability|Other)."
+            "Return JSON: { sentiment: Positive|Neutral|Negative, theme: Performance|Pricing|Docs|Reliability|Other }"
         },
         {
           role: "user",
@@ -19,9 +19,6 @@ export async function analyzeFeedback(env, content) {
   try {
     return JSON.parse(result.response);
   } catch {
-    return {
-      sentiment: "Neutral",
-      theme: "Other"
-    };
+    return { sentiment: "Neutral", theme: "Other" };
   }
 }
