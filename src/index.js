@@ -1,32 +1,32 @@
-import { analyzeFeedback } from "./ai/analyzeFeedback";
+import { analyzeFeedback } from "./ai/analyzeFeedback.js";
 import {
   insertFeedback,
   listFeedback,
   summarizeNegative
-} from "./db/feedbackRepo";
-import { todayKey } from "./utils/date";
+} from "./db/feedbackRepo.js";
+import { todayKey } from "./utils/date.js";
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
     if (request.method === "POST" && url.pathname === "/feedback") {
-      return handleIngest(request, env);
+      return ingest(request, env);
     }
 
     if (request.method === "GET" && url.pathname === "/feedback") {
-      return handleList(env);
+      return Response.json(await listFeedback(env));
     }
 
     if (request.method === "GET" && url.pathname === "/summary") {
-      return handleSummary(env);
+      return getSummary(env);
     }
 
     return new Response("SignalHub running", { status: 200 });
   }
 };
 
-async function handleIngest(request, env) {
+async function ingest(request, env) {
   const { source, content } = await request.json();
 
   const analysis = await analyzeFeedback(env, content);
@@ -38,18 +38,12 @@ async function handleIngest(request, env) {
     theme: analysis.theme
   });
 
-  // Invalidate cached daily summary
   await env.SUMMARY_KV.delete(todayKey());
 
-  return Response.json({ success: true });
+  return Response.json({ ok: true });
 }
 
-async function handleList(env) {
-  const results = await listFeedback(env);
-  return Response.json(results);
-}
-
-async function handleSummary(env) {
+async function getSummary(env) {
   const key = todayKey();
 
   const cached = await env.SUMMARY_KV.get(key);
@@ -57,16 +51,16 @@ async function handleSummary(env) {
     return Response.json(JSON.parse(cached));
   }
 
-  const summary = await summarizeNegative(env);
+  const data = await summarizeNegative(env);
 
-  const response = {
+  const summary = {
     date: key.replace("summary-", ""),
-    top_negative_themes: summary
+    top_negative_themes: data
   };
 
-  await env.SUMMARY_KV.put(key, JSON.stringify(response), {
+  await env.SUMMARY_KV.put(key, JSON.stringify(summary), {
     expirationTtl: 86400
   });
 
-  return Response.json(response);
+  return Response.json(summary);
 }
